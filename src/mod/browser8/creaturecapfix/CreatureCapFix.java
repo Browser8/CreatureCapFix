@@ -37,7 +37,7 @@ public class CreatureCapFix implements WurmServerMod, PreInitable {
 							+ "		} else if ($4) {\r\n"
 							+ "			return com.wurmonline.server.creatures.Creatures.getInstance().getNumberOfKingdomCreatures() < com.wurmonline.server.Servers.localServer.maxCreatures\r\n"
 							+ "					/ (com.wurmonline.server.Servers.localServer.PVPSERVER ? 50 : 200);\r\n"
-							+ "		} else if (com.wurmonline.server.creatures.Creatures.getInstance().getNumberOfNice() > com.wurmonline.server.Servers.localServer.maxCreatures * com.wurmonline.server.Servers.localServer.percentAggCreatures / 100\r\n"
+							+ "		} else if (com.wurmonline.server.creatures.Creatures.getInstance().getNumberOfNice() > com.wurmonline.server.Servers.localServer.maxCreatures * (1 - com.wurmonline.server.Servers.localServer.percentAggCreatures / 100)\r\n"
 							+ "				- ($3 ? breedingLimit : 0)) {\r\n"
 							+ "			return false;\r\n"
 							+ "		} else {\r\n"
