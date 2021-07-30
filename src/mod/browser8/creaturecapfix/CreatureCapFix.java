@@ -12,7 +12,7 @@ import javassist.CtClass;
 import javassist.CtMethod;
 
 public class CreatureCapFix implements WurmServerMod, PreInitable {
-	
+
 	private static Logger logger = Logger.getLogger(CreatureCapFix.class.getName());
 
 	@Override
@@ -22,29 +22,27 @@ public class CreatureCapFix implements WurmServerMod, PreInitable {
 
 			ClassPool classPool = HookManager.getInstance().getClassPool();
 			CtClass ctZone = classPool.get("com.wurmonline.server.zones.Zone");
-			
+
 			for (CtMethod method  : ctZone.getDeclaredMethods("maySpawnCreatureTemplate")) {
 				if (method.getParameterTypes().length == 4) {
 					logger.log(Level.INFO, "Replacing maySpawnCreatureTemplate method...");
 					method.setBody(
 
-							"{ if (($1.isAggHuman() || $1.isMonster()) && (float) com.wurmonline.server.creatures.Creatures.getInstance().getNumberOfAgg()\r\n"
-							+ "				/ (float) com.wurmonline.server.creatures.Creatures.getInstance().getNumberOfCreatures() > com.wurmonline.server.Servers.localServer.percentAggCreatures\r\n"
-							+ "						/ 100.0F) {\r\n"
-							+ "			return false;\r\n"
-							+ "		} else if ($2 && com.wurmonline.server.creatures.Creatures.getInstance().getNumberOfTyped() >= com.wurmonline.server.Servers.localServer.maxTypedCreatures) {\r\n"
-							+ "			return false;\r\n"
-							+ "		} else if ($4) {\r\n"
-							+ "			return com.wurmonline.server.creatures.Creatures.getInstance().getNumberOfKingdomCreatures() < com.wurmonline.server.Servers.localServer.maxCreatures\r\n"
-							+ "					/ (com.wurmonline.server.Servers.localServer.PVPSERVER ? 50 : 200);\r\n"
-							+ "		} else if (com.wurmonline.server.creatures.Creatures.getInstance().getNumberOfNice() > com.wurmonline.server.Servers.localServer.maxCreatures * (1 - com.wurmonline.server.Servers.localServer.percentAggCreatures / 100)\r\n"
-							+ "				- ($3 ? breedingLimit : 0)) {\r\n"
-							+ "			return false;\r\n"
-							+ "		} else {\r\n"
-							+ "			int nums = com.wurmonline.server.creatures.Creatures.getInstance().getCreatureByType($1.getTemplateId());\r\n"
-							+ "			return (float) nums <= (float) com.wurmonline.server.Servers.localServer.maxCreatures * $1.getMaxPercentOfCreatures()\r\n"
-							+ "					&& (!$1.usesMaxPopulation() || nums < $1.getMaxPopulationOfCreatures());\r\n"
-							+ "		}}"
+							"{"
+							+ "    com.wurmonline.server.creatures.Creatures cInstance = com.wurmonline.server.creatures.Creatures.getInstance();"
+							+ "    if (($1.isAggHuman() || $1.isMonster()) && (float) cInstance.getNumberOfAgg() / (float) com.wurmonline.server.Servers.localServer.maxCreatures > com.wurmonline.server.Servers.localServer.percentAggCreatures / 100.0F) {"
+							+ "        return false;"
+							+ "    } else if ($2 && cInstance.getNumberOfTyped() >= com.wurmonline.server.Servers.localServer.maxTypedCreatures) {"
+							+ "        return false;"
+							+ "    } else if ($4) {"
+							+ "        return cInstance.getNumberOfKingdomCreatures() < com.wurmonline.server.Servers.localServer.maxCreatures / (com.wurmonline.server.Servers.localServer.PVPSERVER ? 50 : 200);"
+							+ "    } else if (cInstance.getNumberOfNice() >= com.wurmonline.server.Servers.localServer.maxCreatures * (1 - com.wurmonline.server.Servers.localServer.percentAggCreatures / 100.0F) - ($3 ? breedingLimit : 0)) {"
+							+ "        return false;"
+							+ "    } else {"
+							+ "        int nums = cInstance.getCreatureByType($1.getTemplateId());"
+							+ "        return (float) nums <= (float) com.wurmonline.server.Servers.localServer.maxCreatures * $1.getMaxPercentOfCreatures() && (!$1.usesMaxPopulation() || nums < $1.getMaxPopulationOfCreatures());"
+							+ "    }"
+							+ "}"
 
 					);
 					logger.log(Level.INFO, "Succesfully replaced maySpawnCreatureTemplate.");
